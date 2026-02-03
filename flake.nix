@@ -32,7 +32,6 @@
           };
 
           packages = {
-            inherit (pkgs.python3Packages) biotite;
             inherit (pkgs.python3Packages) fair-esm;
           };
 
