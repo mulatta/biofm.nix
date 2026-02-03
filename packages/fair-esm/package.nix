@@ -11,14 +11,6 @@
   biotite ? (callPackage ../biotite/package.nix { }),
   scipy,
   torch-geometric,
-  # optional: ESMFold (requires openfold, not yet in nixpkgs)
-  withEsmfold ? false,
-  dm-tree ? null,
-  einops ? null,
-  ml-collections ? null,
-  omegaconf ? null,
-  pandas ? null,
-  pytorch-lightning ? null,
   # dependencies
   biopython,
   requests,
@@ -66,15 +58,6 @@ buildPythonPackage {
     biotite
     scipy
     torch-geometric
-  ]
-  ++ lib.optionals withEsmfold [
-    dm-tree
-    einops
-    ml-collections
-    omegaconf
-    pandas
-    pytorch-lightning
-    scipy
   ];
 
   # No upstream tests (all require network for model downloads)
@@ -85,13 +68,10 @@ buildPythonPackage {
   ]
   ++ lib.optionals withInverseFolding [
     "esm.inverse_folding"
-  ]
-  ++ lib.optionals withEsmfold [
-    "esm.esmfold.v1"
   ];
 
   passthru = {
-    inherit withInverseFolding withEsmfold;
+    inherit withInverseFolding;
     category = "Protein Language Models";
   };
 
@@ -100,8 +80,6 @@ buildPythonPackage {
     homepage = "https://github.com/facebookresearch/esm";
     changelog = "https://github.com/facebookresearch/esm/releases/tag/v2.0.0";
     license = lib.licenses.mit;
-    # openfold is not yet packaged in nixpkgs
-    broken = withEsmfold;
     platforms = lib.platforms.linux ++ lib.platforms.darwin;
   };
 }
