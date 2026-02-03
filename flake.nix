@@ -32,7 +32,7 @@
           };
 
           packages = {
-            inherit (pkgs.python3Packages) fair-esm;
+            inherit (pkgs.python3Packages) ankh fair-esm;
           };
 
           devShells.default = pkgs.mkShellNoCC {
