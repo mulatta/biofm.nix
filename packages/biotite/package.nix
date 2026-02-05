@@ -13,7 +13,7 @@
   numpy,
   requests,
 }:
-buildPythonPackage (finalAttrs: {
+buildPythonPackage {
   pname = "biotite";
   version = "0.39.0";
   pyproject = true;
@@ -21,7 +21,7 @@ buildPythonPackage (finalAttrs: {
   src = fetchFromGitHub {
     owner = "biotite-dev";
     repo = "biotite";
-    tag = "v${finalAttrs.version}";
+    tag = "v0.39.0";
     hash = "sha256-4kC4FYuw/HMhJI6a20N62O5nE5t4EDTli/NhrmrpuLg=";
   };
 
@@ -57,4 +57,4 @@ buildPythonPackage (finalAttrs: {
     license = lib.licenses.bsd3;
     platforms = lib.platforms.linux ++ lib.platforms.darwin;
   };
-})
+}
