@@ -1,31 +1,26 @@
 {
   lib,
   buildPythonPackage,
-  callPackage,
   fetchFromGitHub,
   # build-system
   setuptools,
+  # dependencies
   torch,
-  # optional: inverse folding (ESM-IF)
-  withInverseFolding ? false,
-  biotite ? (callPackage ../biotite/package.nix { }),
+  # optional-dependencies: inverse-folding
+  biotite,
   scipy,
   torch-geometric,
-  # dependencies
-  biopython,
-  requests,
-  tqdm,
 }:
 buildPythonPackage {
   pname = "fair-esm";
-  version = "2.0.0";
+  version = "2.0.0-unstable-2023-06-27";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "facebookresearch";
     repo = "esm";
-    tag = "v2.0.0";
-    hash = "sha256-dFjn40maCYf6HjnFoyArk9q6GlDpe+0yyQJasNRAc4E=";
+    rev = "2b369911bb5b4b0dda914521b9475cad1656b2ac";
+    hash = "sha256-p82UipKQYSFEuCiZijzUlInqwXhXrbiZwcNLBUzLXE0=";
   };
 
   build-system = [ setuptools ];
@@ -34,46 +29,24 @@ buildPythonPackage {
     # Fix PyTorch 2.6+ compatibility (weights_only default changed to True)
     substituteInPlace esm/pretrained.py \
       --replace-fail 'map_location="cpu"' 'map_location="cpu", weights_only=False'
-  ''
-  + lib.optionalString withInverseFolding ''
-    # Replace torch_scatter with torch_geometric.utils.scatter
-    # (torch_scatter is a legacy C++ extension not in nixpkgs;
-    #  torch_geometric.utils.scatter uses native PyTorch scatter_add_ as fallback)
-    substituteInPlace esm/inverse_folding/gvp_modules.py \
-      --replace-fail 'from torch_scatter import scatter_add, scatter' \
-        'from torch_geometric.utils import scatter as _scatter
-    def scatter_add(src, index, dim=0, dim_size=None):
-        return _scatter(src, index, dim=dim, dim_size=dim_size, reduce="sum")
-    def scatter(src, index, dim=0, dim_size=None, reduce="sum"):
-        return _scatter(src, index, dim=dim, dim_size=dim_size, reduce=reduce)'
   '';
 
-  dependencies = [
-    biopython
-    requests
-    torch
-    tqdm
-  ]
-  ++ lib.optionals withInverseFolding [
-    biotite
-    scipy
-    torch-geometric
-  ];
+  dependencies = [ torch ];
+
+  optional-dependencies = {
+    inverse-folding = [
+      biotite
+      scipy
+      torch-geometric
+    ];
+  };
 
   # No upstream tests (all require network for model downloads)
   doCheck = false;
 
-  pythonImportsCheck = [
-    "esm"
-  ]
-  ++ lib.optionals withInverseFolding [
-    "esm.inverse_folding"
-  ];
+  pythonImportsCheck = [ "esm" ];
 
-  passthru = {
-    inherit withInverseFolding;
-    category = "Protein Language Models";
-  };
+  passthru.category = "Protein Language Models";
 
   meta = {
     description = "Evolutionary Scale Modeling (esm): Pretrained language models for proteins";
